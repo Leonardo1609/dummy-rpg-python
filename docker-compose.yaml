@@ -1,0 +1,10 @@
+version: "3.9"
+
+services:
+  python_rpg:
+    build: ./
+    container_name: rpg_game
+    volumes:
+      - ./index.py:/app/index.py
+    stdin_open: true
+    tty: true

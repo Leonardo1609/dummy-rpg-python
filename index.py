@@ -20,6 +20,9 @@ def red_message( message ):
 def success_message( message ):
     print(f"{bcolors.OKGREEN}{message}{bcolors.ENDC}")
 
+def information_message( message ):
+    print(f"{bcolors.OKCYAN}{message}{bcolors.ENDC}")
+
 class Avatar():
     damage_range = ""
     damage = 0
@@ -43,7 +46,7 @@ class Avatar():
         enemy.receive_damage( self.damage )
 
     def regeneration( self ):
-        print('HP regeneration: {}'.format( self.hp_regeneration ))
+        information_message(f'HP regeneration: {self.hp_regeneration}')
         quantity = 0
         while True:
             try:
@@ -65,21 +68,27 @@ class Avatar():
 
     @classmethod
     def information( cls ):
-        return "Damage: {d}, life: {l}, hp regeneration: {hp}".format( d = cls.damage_range, l = cls.life, hp = cls.hp_regeneration )
+        return f"Damage: {cls.damage_range}, life: {cls.life}, hp regeneration: {cls.hp_regeneration}"
 
     @classmethod
     def select_avatar( cls ):
         player_name = input("Enter your name: ")
         option_avatar = ""
-        while option_avatar != 1 and option_avatar != 2 and option_avatar != 3:
-            option_avatar = int(input("""Choose your avatar: 
+        while True:
+            try:
+                option_avatar = int(input(f"""{bcolors.OKCYAN}Choose your avatar: 
 _____________________________________________________________________
-| 1) Warrior - {w} |
-| 2) Wizard - {wz}   |
-| 3) Dwafr - {d}    |
+| 1) Warrior - {Warrior.information()} |
+| 2) Wizard - {Wizard.information()}   |
+| 3) Dwafr - {Dwafr.information()}    |
 ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
-Enter 1, 2 or 3: """.format( w = Warrior.information(), wz = Wizard.information(), d = Dwafr.information() )))
-
+Enter 1, 2 or 3: {bcolors.ENDC}"""))
+                if option_avatar <= 0 or option_avatar > 3:
+                    raise ValueError
+                break
+            except ValueError:
+                print(f"{bcolors.FAIL}Choose a valid option (1 - 2 - 3){bcolors.ENDC}")
+                
         if( option_avatar == 1 ):
             return Warrior( player_name )
         elif( option_avatar == 2 ):
@@ -184,19 +193,28 @@ Select 1, 2 or 3: {bcolors.ENDC}"""))
                 else:
                     # Print all players and choose the enemy 
                     print_players( players )
-                    enemy_idx = int(input("Enter number of the enemy you want to attack: "))
-                    while enemy_idx == idx or  0 > enemy_idx or enemy_idx >= len(players):
-                        # validation if the selected enemy index was the same player or index outside of the array
-                        enemy_idx = int(input(f"{bcolors.FAIL}Error: Enter number of the enemy you want to attack again: {bcolors.ENDC}"))
-                    enemy = players[ enemy_idx ]
+                    while True:
+                        try:
+                            enemy_idx = int(input("Enter number of the enemy you want to attack: "))
+                            # validation if the selected enemy index was the same player or index outside of the array
+                            if enemy_idx == idx or  0 > enemy_idx or enemy_idx >= len(players):
+                                raise ArithmeticError
+
+                            enemy = players[ enemy_idx ]
+                            break
+                        except ArithmeticError:
+                            print(f"{bcolors.FAIL}Error: You choosed yourself or a player outside of the list of players {bcolors.ENDC}")
+                        except ValueError:
+                            print(f"{bcolors.FAIL}Error: Insert a valid value{bcolors.ENDC}")
                 player.attack( enemy )
+
             elif option == 2:
                 # Regenerate hp
                 player.regeneration()
             elif option == 3:
                 # See the information of player
-                position = idx + 1 if idx < len( players ) - 1 else 0
                 print ( player )
+                position = idx + 1 if idx < len( players ) - 1 else 0
                 # The following is because this option doesn't take a turn for the player
                 # Remove the player from the players array
                 players.remove( player )
